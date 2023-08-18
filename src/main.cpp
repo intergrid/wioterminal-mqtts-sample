@@ -2,8 +2,8 @@
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
 
-const char *ssid = "<your-ssid>";      // your network SSID
-const char *password = "<your-password>"; // your network password
+const char *ssid = "underhill";      // your network SSID
+const char *password = "yoga-mat"; // your network password
 
 const char *server = "test.mosquitto.org"; // Server URL
 const char *test_root_ca =
