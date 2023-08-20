@@ -7,6 +7,7 @@ const char *ssid = "underhill";      // your network SSID
 const char *password = "yoga-mat"; // your network password
 
 const char *server = "test.mosquitto.org"; // Server URL
+//const char *server = "c68b630709884839a87be09740cdc595.s2.eu.hivemq.cloud";
 const char *test_root_ca =
     "-----BEGIN CERTIFICATE-----\n"
     "MIIEAzCCAuugAwIBAgIUBY1hlCGvdj4NhBXkZ/uLUZNILAwwDQYJKoZIhvcNAQEL\n"
@@ -40,7 +41,7 @@ void callback(char *topic, byte *payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
-  for (int i = 0; i < length; i++) {
+  for (unsigned int i = 0; i < length; i++) {
     Serial.print((char)payload[i]);
   }
   Serial.println();
@@ -50,10 +51,11 @@ void reconnect() {
   // Loop until we're reconnected
   while (!client.connected()) {
     Serial.print("Trying MQTT connection...");
+    client.setServer(server, 8883);
     // try connect
-    //if (client.connect("intergrid","intergrid19","Tasmania19")) {
+    //if (client.connect("intergrid19","intergrid19","Tasmania19")) {
     if (client.connect("intergrid")) {
-      Serial.println("connected");
+      Serial.println("MQTT connected");
       // Once connected, publish an announcement...
       client.publish("WindMon", "Hello World!");
       // ... and resubscribe
@@ -100,5 +102,7 @@ void loop() {
   }
   client.loop();
   delay(5000);
-  client.publish("WindMon", "loop");
+  int Seconds = millis() / 1000;
+  String S = "T="+String(Seconds);
+  client.publish("WindMon", S.c_str());
 }
