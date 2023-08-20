@@ -40,8 +40,7 @@ void callback(char *topic, byte *payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
-  for (int i = 0; i < length; i++)
-  {
+  for (int i = 0; i < length; i++) {
     Serial.print((char)payload[i]);
   }
   Serial.println();
@@ -50,14 +49,15 @@ void callback(char *topic, byte *payload, unsigned int length) {
 void reconnect() {
   // Loop until we're reconnected
   while (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
+    Serial.print("Trying MQTT connection...");
     // try connect
-    if (client.connect("intergrid","intergrid19","Tasmania19")) {
+    //if (client.connect("intergrid","intergrid19","Tasmania19")) {
+    if (client.connect("intergrid")) {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish("outTopic", "Hello from Wio Terminal");
+      client.publish("WindMon", "Hello World!");
       // ... and resubscribe
-      client.subscribe("inTopic");
+      client.subscribe("WindMon");
     }
     else {
       Serial.print("failed, rc=");
@@ -74,6 +74,7 @@ void setup() {
   Serial.begin(115200);
   while (!Serial) ; // Wait for Serial to be ready
   delay(1000);
+  Serial.println("MQTT Test V1.0");
 
   Serial.print("Wifi - trying SSID: ");
   Serial.println(ssid);
@@ -93,12 +94,11 @@ void setup() {
   client.setCallback(callback);
 }
 
-void loop()
-{
-  if (!client.connected())
-  {
+void loop() {
+  if (!client.connected()) {
     reconnect();
   }
-
   client.loop();
+  delay(5000);
+  client.publish("WindMon", "loop");
 }
