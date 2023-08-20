@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
+#include <SPI.h>
 
 const char *ssid = "underhill";      // your network SSID
 const char *password = "yoga-mat"; // your network password
@@ -35,8 +36,7 @@ const char *test_root_ca =
 WiFiClientSecure wifiClient;
 PubSubClient client(wifiClient);
 
-void callback(char *topic, byte *payload, unsigned int length)
-{
+void callback(char *topic, byte *payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
@@ -47,23 +47,19 @@ void callback(char *topic, byte *payload, unsigned int length)
   Serial.println();
 }
 
-void reconnect()
-{
+void reconnect() {
   // Loop until we're reconnected
-  while (!client.connected())
-  {
+  while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
-    // Attempt to connect
-    if (client.connect("arduinoClient"))
-    {
+    // try connect
+    if (client.connect("intergrid","intergrid19","Tasmania19")) {
       Serial.println("connected");
       // Once connected, publish an announcement...
       client.publish("outTopic", "Hello from Wio Terminal");
       // ... and resubscribe
       client.subscribe("inTopic");
     }
-    else
-    {
+    else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
       Serial.println(" try again in 5 seconds");
@@ -73,26 +69,22 @@ void reconnect()
   }
 }
 
-void setup()
-{
+void setup() {
   //Initialize serial and wait for port to open:
   Serial.begin(115200);
-  while (!Serial)
-    ; // Wait for Serial to be ready
+  while (!Serial) ; // Wait for Serial to be ready
   delay(1000);
 
-  Serial.print("Attempting to connect to SSID: ");
+  Serial.print("Wifi - trying SSID: ");
   Serial.println(ssid);
-  WiFi.begin(ssid, password);
-
+  WiFi.begin("underhill", "yoga-mat");
+  Serial.println("Wifi begin ok");
   // attempt to connect to Wifi network:
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.print(".");
-    // wait 1 second for re-trying
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print("."); // wait 1 second for re-trying
     delay(1000);
   }
-  Serial.print("Connected to ");
+  Serial.print("Wifi Connected to ");
   Serial.println(ssid);
 
   wifiClient.setCACert(test_root_ca);
