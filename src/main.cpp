@@ -2,11 +2,18 @@
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
 #include <SPI.h>
-
+#define MOSQUITO
 const char *ssid = "underhill";      // your network SSID
 const char *password = "yoga-mat"; // your network password
+String MQstate(int state);
 
-const char *server = "test.mosquitto.org"; // Server URL
+#ifdef MOSQUITO
+ char *server = "test.mosquitto.org"; // Server URL
+ int port = 8883;
+#else
+const char *server = "r827716c.ala.us-east-1.emqxsl.com"; // Server URL
+#endif
+
 //const char *server = "c68b630709884839a87be09740cdc595.s2.eu.hivemq.cloud";
 const char *test_root_ca =
     "-----BEGIN CERTIFICATE-----\n"
@@ -51,10 +58,14 @@ void reconnect() {
   // Loop until we're reconnected
   while (!client.connected()) {
     Serial.print("Trying MQTT connection...");
-    client.setServer(server, 8883);
+    client.setServer(server, port);
     // try connect
-    //if (client.connect("intergrid19","intergrid19","Tasmania19")) {
+#ifdef MOSQUITO
     if (client.connect("intergrid")) {
+ #else
+    if (client.connect("intergrid","intergrid19","Tasmania19")) {
+#endif
+    
       Serial.println("MQTT connected");
       // Once connected, publish an announcement...
       client.publish("WindMon", "Hello World!");
@@ -62,8 +73,10 @@ void reconnect() {
       client.subscribe("WindMon");
     }
     else {
+      int state = client.state();
       Serial.print("failed, rc=");
-      Serial.print(client.state());
+      Serial.print(state);
+      Serial.println(MQstate(state));
       Serial.println(" try again in 5 seconds");
       // Wait 5 seconds before retrying
       delay(5000);
@@ -92,17 +105,36 @@ void setup() {
 
   wifiClient.setCACert(test_root_ca);
 
-  client.setServer(server, 8883);
+  client.setServer(server, port);
   client.setCallback(callback);
 }
-
+int LastSeconds = 0;
 void loop() {
   if (!client.connected()) {
     reconnect();
   }
   client.loop();
-  delay(5000);
-  int Seconds = millis() / 1000;
-  String S = "T="+String(Seconds);
-  client.publish("WindMon", S.c_str());
+  delay(1);
+  int Interval = millis() / 5000;
+  if(Interval != LastSeconds) {
+    LastSeconds = Interval;
+    String S = "T="+String(Interval);
+    client.publish("WindMon", S.c_str());
+  }
+}
+//--------------------------------------------------------
+String MQstate(int state) {
+switch(state) {
+  case MQTT_CONNECTION_TIMEOUT: return " Connection Timeout";
+  case MQTT_CONNECTION_LOST: return " Connection Timeout";
+  case MQTT_CONNECT_FAILED: return " Connection Failed";
+  case MQTT_DISCONNECTED: return " Disconnected";
+  case MQTT_CONNECTED: return " Connected";
+  case MQTT_CONNECT_BAD_PROTOCOL: return " Bad Protocol";
+  case MQTT_CONNECT_BAD_CLIENT_ID: return " Bad Client ID";
+  case MQTT_CONNECT_UNAVAILABLE: return " Connect Unavailable";
+  case MQTT_CONNECT_BAD_CREDENTIALS: return " Bad Credentials";
+  case MQTT_CONNECT_UNAUTHORIZED: return  "Unauthorized";
+  default: return "Unknown State";
+}
 }
