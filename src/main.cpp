@@ -6,17 +6,16 @@
 const char *ssid = "underhill";      // your network SSID
 const char *password = "yoga-mat"; // your network password
 String MQstate(int state);
-
+int port = 8883;
 #ifdef MOSQUITO
  char *server = "test.mosquitto.org"; // Server URL
- int port = 8883;
 #else
-const char *server = "r827716c.ala.us-east-1.emqxsl.com"; // Server URL
+const char *server = "a3k5r1hk2ir232-ats.iot.us-east-1.amazonaws.com"; // Server URL
 #endif
 
 //const char *server = "c68b630709884839a87be09740cdc595.s2.eu.hivemq.cloud";
 const char *test_root_ca =
-    "-----BEGIN CERTIFICATE-----\n"
+ /*   "-----BEGIN CERTIFICATE-----\n"
     "MIIEAzCCAuugAwIBAgIUBY1hlCGvdj4NhBXkZ/uLUZNILAwwDQYJKoZIhvcNAQEL\n"
     "BQAwgZAxCzAJBgNVBAYTAkdCMRcwFQYDVQQIDA5Vbml0ZWQgS2luZ2RvbTEOMAwG\n"
     "A1UEBwwFRGVyYnkxEjAQBgNVBAoMCU1vc3F1aXR0bzELMAkGA1UECwwCQ0ExFjAU\n"
@@ -39,7 +38,27 @@ const char *test_root_ca =
     "sMwfu1HFvjy5Z0iMDU8PUDepjVolOCue9ashlS4EB5IECdSR2TItnAIiIwimx839\n"
     "LdUdRudafMu5T5Xma182OC0/u/xRlEm+tvKGGmfFcN0piqVl8OrSPBgIlb+1IKJE\n"
     "m/XriWr/Cq4h/JfB7NTsezVslgkBaoU=\n"
-    "-----END CERTIFICATE-----\n";
+    "-----END CERTIFICATE-----\n"; */
+"-----BEGIN CERTIFICATE-----\n"
+"MIIDWTCCAkGgAwIBAgIUIVPCxirO3kcd1qy0y5xOpakNHiswDQYJKoZIhvcNAQEL\n"
+"BQAwTTFLMEkGA1UECwxCQW1hem9uIFdlYiBTZXJ2aWNlcyBPPUFtYXpvbi5jb20g\n"
+"SW5jLiBMPVNlYXR0bGUgU1Q9V2FzaGluZ3RvbiBDPVVTMB4XDTIzMDkwNTAxNDE0\n"
+"OFoXDTQ5MTIzMTIzNTk1OVowHjEcMBoGA1UEAwwTQVdTIElvVCBDZXJ0aWZpY2F0\n"
+"ZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANxtjVoO/I9w75HNxo5s\n"
+"vJzbnnoqxeDyqiOmqOWpJw5lRyQdoQGA8zuEj2J3P53QameZOAdecF7L8IQn2Ppr\n"
+"7hVmhks/ZQuvApPUtRDxkFi8L07DwBm/zoJ4ZEPzt47WiHl7pmadk3UO9F1JSALy\n"
+"tG3aFS+OKVF36HJ2SXHgCVVuZCijpVTwQGsjXWBFD2SwOwPcFsYw+fJHUhiCAjDl\n"
+"K4Q3xdcaopTnwJEVXzY/Q8ixVPKofntA4LoKrLd3Ha+CblfobWtY2BCTuUT7kXn2\n"
+"rmvJNFEOy4Nv2wE3zkR0rFR06XoYNyFbka+K3n/7UKB/jo1fUWzn2/V6b0REWWdf\n"
+"W4kCAwEAAaNgMF4wHwYDVR0jBBgwFoAU6YbwTx5+xlORRJDx5anoBNcRLx8wHQYD\n"
+"VR0OBBYEFBcNWOrwM1OcqeQ+iUlrzRjgvkDXMAwGA1UdEwEB/wQCMAAwDgYDVR0P\n"
+"AQH/BAQDAgeAMA0GCSqGSIb3DQEBCwUAA4IBAQAuhy1eRGNJfDSjTQvLjbf+smCG\n"
+"KVf/1vNFxB0goaiPyNvw7n+8bmNaFJTOk4jLk5Q+nTBvUccDLfHzxYCNIQm9N3NI\n"
+"yZXmER+G/Kp6CW2048wMDJW3AJ6PyZDLIfuUca0nPdACU0Ru+igutnUfx7j0ANOZ\n"
+"RmtX6m7UAA9tzMeXMRncb/LeA8BcFd5XGdZiTwXcZn8r/hsspNAlWmfHuDHe/RpG\n"
+"kQmYTbVLOnPJSllepoc+oR816uVW4xcM2/IV8hgTXhuG61PEvkj3Fibq+7pJGRYD\n"
+"9k7nnOdGY1Qt1cleew53Aj5fT85DPkK72yQqogEaJCAW8SnbijItBcyY4pNX\n"
+"-----END CERTIFICATE-----\n";
 
 WiFiClientSecure wifiClient;
 PubSubClient client(wifiClient);
@@ -63,7 +82,7 @@ void reconnect() {
 #ifdef MOSQUITO
     if (client.connect("intergrid")) {
  #else
-    if (client.connect("intergrid","intergrid19","Tasmania19")) {
+    if (client.connect("intergrid","WIO","Bunyip")) {
 #endif
     
       Serial.println("MQTT connected");
@@ -83,11 +102,11 @@ void reconnect() {
     }
   }
 }
-
+//-------------------------------------------------------------
 void setup() {
   //Initialize serial and wait for port to open:
   Serial.begin(115200);
-  while (!Serial) ; // Wait for Serial to be ready
+  //while (!Serial) ; // Wait for Serial to be ready
   delay(1000);
   Serial.println("MQTT Test V1.0");
 
@@ -109,6 +128,7 @@ void setup() {
   client.setCallback(callback);
 }
 int LastSeconds = 0;
+//---------------------------------------------------------
 void loop() {
   if (!client.connected()) {
     reconnect();
